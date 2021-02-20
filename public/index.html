@@ -18,7 +18,7 @@
       async function fetchVersion(runtime) {
         const res = await fetch(`${baseUrl}${runtime}`);
         const body = await res.text();
-        return { runtime, body };
+        return { runtime, version: body };
       }
 
       async function fetchVersions() {
