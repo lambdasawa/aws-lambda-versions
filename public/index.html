@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>aws-lambda-versions</title>
+    <script>
+      const runtimes = [
+        "AWS_Lambda_nodejs10.x",
+        "AWS_Lambda_nodejs12.x",
+        "AWS_Lambda_nodejs14.x",
+      ];
+
+      const baseUrl =
+        "http://aws-lambda-versions.s3-website-ap-northeast-1.amazonaws.com/";
+
+      async function fetchVersion(runtime) {
+        const res = await fetch(`${baseUrl}${runtime}`);
+        const body = await res.text();
+        return { runtime, body };
+      }
+
+      async function fetchVersions() {
+        const versions = await Promise.all(runtimes.map(fetchVersion));
+        versions.sort((a, b) => a.runtime < b.runtime);
+        document.getElementById("result").textContent = JSON.stringify(
+          versions,
+          null,
+          2
+        );
+      }
+
+      fetchVersions().then(console.log).catch(console.error);
+    </script>
+  </head>
+  <body>
+    <pre id="result" />
+  </body>
+</html>
