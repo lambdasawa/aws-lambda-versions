@@ -8,7 +8,7 @@ import * as cdk from "@aws-cdk/core";
 
 const bucketName = "aws-lambda-versions";
 
-type LambdaDirectory = "nodejs" | "python3" | "python2";
+type LambdaDirectory = "nodejs" | "python3" | "python2" | "ruby";
 
 type Function = {
   name: string;
@@ -52,12 +52,23 @@ const functions: Function[] = [
     runtime: lambda.Runtime.PYTHON_2_7,
     directory: "python2",
   },
+  {
+    name: "Ruby27Function",
+    runtime: lambda.Runtime.RUBY_2_7,
+    directory: "ruby",
+  },
+  {
+    name: "Ruby25Function",
+    runtime: lambda.Runtime.RUBY_2_5,
+    directory: "ruby",
+  },
 ];
 
 const handlers: Record<LambdaDirectory, string> = {
   nodejs: "index.handler",
   python3: "index.handler",
   python2: "index.handler",
+  ruby: "index.handler",
 };
 
 export class AwsLambdaVersionsStack extends cdk.Stack {
