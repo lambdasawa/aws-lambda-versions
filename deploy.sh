@@ -10,6 +10,14 @@ done
 popd
 
 pushd $(pwd)
+cd app/java
+gradle -i build
+cd build/distributions
+unzip -o java.zip
+rm java.zip
+popd
+
+pushd $(pwd)
 cd infra
 npm i
 npm run cdk -- deploy --all --require-approval never --events logs
