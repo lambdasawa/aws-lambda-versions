@@ -8,7 +8,7 @@ import * as cdk from "@aws-cdk/core";
 
 const bucketName = "aws-lambda-versions";
 
-type LambdaDirectory = "nodejs";
+type LambdaDirectory = "nodejs" | "python3" | "python2";
 
 type Function = {
   name: string;
@@ -32,10 +32,32 @@ const functions: Function[] = [
     runtime: lambda.Runtime.NODEJS_10_X,
     directory: "nodejs",
   },
+  {
+    name: "Python38Function",
+    runtime: lambda.Runtime.PYTHON_3_8,
+    directory: "python3",
+  },
+  {
+    name: "Python37Function",
+    runtime: lambda.Runtime.PYTHON_3_7,
+    directory: "python3",
+  },
+  {
+    name: "Python36Function",
+    runtime: lambda.Runtime.PYTHON_3_6,
+    directory: "python3",
+  },
+  {
+    name: "Python27Function",
+    runtime: lambda.Runtime.PYTHON_2_7,
+    directory: "python2",
+  },
 ];
 
 const handlers: Record<LambdaDirectory, string> = {
   nodejs: "index.handler",
+  python3: "index.handler",
+  python2: "index.handler",
 };
 
 export class AwsLambdaVersionsStack extends cdk.Stack {
@@ -67,6 +89,7 @@ export class AwsLambdaVersionsStack extends cdk.Stack {
         code: lambda.Code.fromAsset(
           path.join(__dirname, "..", "..", "app", f.directory)
         ),
+        timeout: cdk.Duration.seconds(5),
       });
 
       bucket.grantReadWrite(func);
