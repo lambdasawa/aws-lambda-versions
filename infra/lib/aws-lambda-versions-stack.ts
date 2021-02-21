@@ -8,12 +8,13 @@ import * as cdk from "@aws-cdk/core";
 
 const bucketName = "aws-lambda-versions";
 
-type LambdaDirectory = "nodejs" | "python3" | "python2" | "ruby";
+type LambdaDirectory = "nodejs" | "python3" | "python2" | "ruby" | "dotnet";
 
 type Function = {
   name: string;
   runtime: lambda.Runtime;
   directory: LambdaDirectory;
+  subDirectory?: string;
 };
 
 const functions: Function[] = [
@@ -62,6 +63,18 @@ const functions: Function[] = [
     runtime: lambda.Runtime.RUBY_2_5,
     directory: "ruby",
   },
+  {
+    name: "DotNetCore31Function",
+    runtime: lambda.Runtime.DOTNET_CORE_3_1,
+    directory: "dotnet",
+    subDirectory: "src/MyFunction/bin/Debug/netcoreapp3.1/3.1.406",
+  },
+  {
+    name: "DotNetCore21Function",
+    runtime: lambda.Runtime.DOTNET_CORE_2_1,
+    directory: "dotnet",
+    subDirectory: "src/MyFunction/bin/Debug/netcoreapp3.1/2.1.813",
+  },
 ];
 
 const handlers: Record<LambdaDirectory, string> = {
@@ -69,6 +82,7 @@ const handlers: Record<LambdaDirectory, string> = {
   python3: "index.handler",
   python2: "index.handler",
   ruby: "index.handler",
+  dotnet: "MyFunction::MyFunction.Function::FunctionHandler",
 };
 
 export class AwsLambdaVersionsStack extends cdk.Stack {
@@ -98,9 +112,18 @@ export class AwsLambdaVersionsStack extends cdk.Stack {
         runtime: f.runtime,
         handler: handlers[f.directory],
         code: lambda.Code.fromAsset(
-          path.join(__dirname, "..", "..", "app", f.directory)
+          path.join(
+            ...[
+              __dirname,
+              "..",
+              "..",
+              "app",
+              f.directory,
+              f.subDirectory,
+            ].filter((p): p is string => Boolean(p))
+          )
         ),
-        timeout: cdk.Duration.seconds(5),
+        timeout: cdk.Duration.seconds(15),
       });
 
       bucket.grantReadWrite(func);
