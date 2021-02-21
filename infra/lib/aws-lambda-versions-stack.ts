@@ -8,7 +8,13 @@ import * as cdk from "@aws-cdk/core";
 
 const bucketName = "aws-lambda-versions";
 
-type LambdaDirectory = "nodejs" | "python3" | "python2" | "ruby" | "dotnet";
+type LambdaDirectory =
+  | "nodejs"
+  | "python3"
+  | "python2"
+  | "ruby"
+  | "dotnet"
+  | "java";
 
 type Function = {
   name: string;
@@ -75,6 +81,26 @@ const functions: Function[] = [
     directory: "dotnet",
     subDirectory: "src/MyFunction/bin/Debug/netcoreapp3.1/2.1.813",
   },
+  {
+    name: "Java11unction",
+    runtime: lambda.Runtime.JAVA_11,
+    directory: "java",
+    subDirectory: "build/distributions",
+  },
+  {
+    name: "Java8CorrettoFunction",
+    runtime: lambda.Runtime.JAVA_8,
+    directory: "java",
+    subDirectory: "build/distributions",
+  },
+  /*
+  {
+    name: "Java8CorrettoFunction",
+    runtime: lambda.Runtime.JAVA_8_CORRETTO,
+    directory: "java",
+    subDirectory: "build/distributions",
+  },
+  */
 ];
 
 const handlers: Record<LambdaDirectory, string> = {
@@ -83,6 +109,7 @@ const handlers: Record<LambdaDirectory, string> = {
   python2: "index.handler",
   ruby: "index.handler",
   dotnet: "MyFunction::MyFunction.Function::FunctionHandler",
+  java: "example.Handler::handleRequest",
 };
 
 export class AwsLambdaVersionsStack extends cdk.Stack {
@@ -123,7 +150,8 @@ export class AwsLambdaVersionsStack extends cdk.Stack {
             ].filter((p): p is string => Boolean(p))
           )
         ),
-        timeout: cdk.Duration.seconds(15),
+        timeout: cdk.Duration.minutes(1),
+        memorySize: 512,
       });
 
       bucket.grantReadWrite(func);
