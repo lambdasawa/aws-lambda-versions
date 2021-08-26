@@ -1,5 +1,6 @@
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as s3 from "@aws-cdk/aws-s3";
+import * as s3n from "@aws-cdk/aws-s3-notifications";
 import * as s3Deployment from "@aws-cdk/aws-s3-deployment";
 import * as events from "@aws-cdk/aws-events";
 import * as targets from "@aws-cdk/aws-events-targets";
@@ -147,6 +148,21 @@ export class AwsLambdaVersionsStack extends cdk.Stack {
         new alias.BucketWebsiteTarget(bucket)
       ),
     });
+
+    const jsonUploaderFunc = new lambda.Function(this, "UploadJsonFunction", {
+      runtime: lambda.Runtime.NODEJS_12_X,
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "..", "..", "app", "uploader")
+      ),
+    });
+
+    bucket.grantReadWrite(jsonUploaderFunc);
+
+    bucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED_PUT,
+      new s3n.LambdaDestination(jsonUploaderFunc)
+    );
 
     functions.forEach((f) => {
       const func = new lambda.Function(this, f.name, {
