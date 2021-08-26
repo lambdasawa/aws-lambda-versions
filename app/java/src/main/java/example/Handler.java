@@ -15,11 +15,11 @@ public class Handler implements RequestHandler<Map<String,String>, String>{
       .standard()
       .build()
       .putObject(
-        "aws-lambda-versions",
+        "lambda-versions.com",
         System.getenv("AWS_EXECUTION_ENV"),
         System.getProperty("java.version")
       );
-    
+
     return "";
   }
 }

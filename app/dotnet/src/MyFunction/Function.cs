@@ -27,7 +27,7 @@ namespace MyFunction
       var client = new AmazonS3Client();
       await client.PutObjectAsync(new PutObjectRequest
       {
-        BucketName = "aws-lambda-versions",
+        BucketName = "lambda-versions.com",
         Key = Environment.GetEnvironmentVariable("AWS_EXECUTION_ENV"),
         ContentBody = System.Environment.Version.ToString()
       });
