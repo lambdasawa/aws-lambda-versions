@@ -1,8 +1,12 @@
 # aws-lambda-versions
 
-## Hosting
+## Usage
 
-http://aws-lambda-versions.s3-website-ap-northeast-1.amazonaws.com/
+```sh
+$ open http://lambda-versions.com
+$ curl -s http://lambda-versions.com/versions.json
+$ curl -s http://lambda-versions.com/versions.json | jq -r '.["AWS_Lambda_nodejs14.x"]'
+```
 
 ## Deploy command
 
