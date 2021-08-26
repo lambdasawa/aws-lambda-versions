@@ -1,6 +1,7 @@
 const AWS = require("aws-sdk");
 
 const bucketName = "lambda-versions.com";
+const fileName = "versions.json";
 
 exports.handler = async function (event, context) {
   const keys = await new AWS.S3()
@@ -26,12 +27,26 @@ exports.handler = async function (event, context) {
     )
   );
 
-  console.log({ versions });
+  const previousVersions = await new AWS.S3()
+    .getObject({ Bucket: bucketName, Key: fileName })
+    .promise()
+    .then(({ Body }) => {
+      return JSON.parse(Body.toString("utf-8"));
+    });
+
+  if (
+    Object.keys(previousVersions).length === Object.keys(versions).length &&
+    Object.keys(versions).every(
+      (key) => previousVersions[key] === versions[key]
+    )
+  ) {
+    return; // prevent infinite loop
+  }
 
   await new AWS.S3()
     .putObject({
       Bucket: bucketName,
-      Key: "versions.json",
+      Key: fileName,
       Body: JSON.stringify(versions, null, 2),
       ContentType: "application/json; charset=utf-8",
     })
