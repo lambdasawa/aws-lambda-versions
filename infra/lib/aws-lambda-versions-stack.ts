@@ -5,8 +5,8 @@ import * as events from "@aws-cdk/aws-events";
 import * as targets from "@aws-cdk/aws-events-targets";
 import * as path from "path";
 import * as cdk from "@aws-cdk/core";
-
-const bucketName = "aws-lambda-versions";
+import * as alias from "@aws-cdk/aws-route53-targets";
+import * as route53 from "@aws-cdk/aws-route53";
 
 type LambdaDirectory =
   | "nodejs"
@@ -116,8 +116,10 @@ export class AwsLambdaVersionsStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    const domainName = "lambda-versions.com";
+
     const bucket = new s3.Bucket(this, "WebsiteBucket", {
-      bucketName,
+      bucketName: domainName,
       publicReadAccess: true,
       websiteIndexDocument: "index.html",
     });
@@ -133,6 +135,18 @@ export class AwsLambdaVersionsStack extends cdk.Stack {
         destinationBucket: bucket,
       }
     );
+
+    const zone = route53.HostedZone.fromLookup(this, "Zone", {
+      domainName,
+    });
+
+    const aRecord = new route53.ARecord(this, "AliasRecord", {
+      zone,
+      recordName: domainName,
+      target: route53.RecordTarget.fromAlias(
+        new alias.BucketWebsiteTarget(bucket)
+      ),
+    });
 
     functions.forEach((f) => {
       const func = new lambda.Function(this, f.name, {

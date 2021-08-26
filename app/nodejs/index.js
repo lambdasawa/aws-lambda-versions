@@ -1,6 +1,6 @@
 const AWS = require("aws-sdk");
 
-const bucketName = "aws-lambda-versions";
+const bucketName = "lambda-versions.com";
 
 exports.handler = async function (event, context) {
   await new AWS.S3()

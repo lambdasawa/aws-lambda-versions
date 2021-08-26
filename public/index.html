@@ -22,11 +22,8 @@
         "AWS_Lambda_java8",
       ];
 
-      const baseUrl =
-        "http://aws-lambda-versions.s3-website-ap-northeast-1.amazonaws.com/";
-
       async function fetchVersion(runtime) {
-        const res = await fetch(`${baseUrl}${runtime}`);
+        const res = await fetch(`/${runtime}`);
         const body = await res.text();
         return { runtime, version: body };
       }
