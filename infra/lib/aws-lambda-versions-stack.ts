@@ -41,6 +41,11 @@ const functions: Function[] = [
     directory: "nodejs",
   },
   {
+    name: "Python39Function",
+    runtime: lambda.Runtime.PYTHON_3_9,
+    directory: "python3",
+  },
+  {
     name: "Python38Function",
     runtime: lambda.Runtime.PYTHON_3_8,
     directory: "python3",
