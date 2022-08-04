@@ -9,13 +9,7 @@ import * as cdk from "@aws-cdk/core";
 import * as alias from "@aws-cdk/aws-route53-targets";
 import * as route53 from "@aws-cdk/aws-route53";
 
-type LambdaDirectory =
-  | "nodejs"
-  | "python3"
-  | "python2"
-  | "ruby"
-  | "dotnet"
-  | "java";
+type LambdaDirectory = "nodejs" | "python3" | "python2" | "ruby" | "dotnet" | "java";
 
 type Function = {
   name: string;
@@ -26,6 +20,11 @@ type Function = {
 
 const functions: Function[] = [
   {
+    name: "NodeJs16Function",
+    runtime: lambda.Runtime.NODEJS_16_X,
+    directory: "nodejs",
+  },
+  {
     name: "NodeJs14Function",
     runtime: lambda.Runtime.NODEJS_14_X,
     directory: "nodejs",
@@ -33,11 +32,6 @@ const functions: Function[] = [
   {
     name: "NodeJs12Function",
     runtime: lambda.Runtime.NODEJS_12_X,
-    directory: "nodejs",
-  },
-  {
-    name: "NodeJs10Function",
-    runtime: lambda.Runtime.NODEJS_10_X,
     directory: "nodejs",
   },
   {
@@ -56,23 +50,8 @@ const functions: Function[] = [
     directory: "python3",
   },
   {
-    name: "Python36Function",
-    runtime: lambda.Runtime.PYTHON_3_6,
-    directory: "python3",
-  },
-  {
-    name: "Python27Function",
-    runtime: lambda.Runtime.PYTHON_2_7,
-    directory: "python2",
-  },
-  {
     name: "Ruby27Function",
     runtime: lambda.Runtime.RUBY_2_7,
-    directory: "ruby",
-  },
-  {
-    name: "Ruby25Function",
-    runtime: lambda.Runtime.RUBY_2_5,
     directory: "ruby",
   },
   {
@@ -80,12 +59,6 @@ const functions: Function[] = [
     runtime: lambda.Runtime.DOTNET_CORE_3_1,
     directory: "dotnet",
     subDirectory: "src/MyFunction/bin/Debug/netcoreapp3.1/3.1.406",
-  },
-  {
-    name: "DotNetCore21Function",
-    runtime: lambda.Runtime.DOTNET_CORE_2_1,
-    directory: "dotnet",
-    subDirectory: "src/MyFunction/bin/Debug/netcoreapp3.1/2.1.813",
   },
   {
     name: "Java11unction",
@@ -130,17 +103,11 @@ export class AwsLambdaVersionsStack extends cdk.Stack {
       websiteIndexDocument: "index.html",
     });
 
-    const deployment = new s3Deployment.BucketDeployment(
-      this,
-      "DeployIndexHtml",
-      {
-        sources: [
-          s3Deployment.Source.asset(path.join(__dirname, "..", "..", "public")),
-        ],
-        prune: false,
-        destinationBucket: bucket,
-      }
-    );
+    const deployment = new s3Deployment.BucketDeployment(this, "DeployIndexHtml", {
+      sources: [s3Deployment.Source.asset(path.join(__dirname, "..", "..", "public"))],
+      prune: false,
+      destinationBucket: bucket,
+    });
 
     const zone = route53.HostedZone.fromLookup(this, "Zone", {
       domainName,
@@ -149,25 +116,18 @@ export class AwsLambdaVersionsStack extends cdk.Stack {
     const aRecord = new route53.ARecord(this, "AliasRecord", {
       zone,
       recordName: domainName,
-      target: route53.RecordTarget.fromAlias(
-        new alias.BucketWebsiteTarget(bucket)
-      ),
+      target: route53.RecordTarget.fromAlias(new alias.BucketWebsiteTarget(bucket)),
     });
 
     const jsonUploaderFunc = new lambda.Function(this, "UploadJsonFunction", {
       runtime: lambda.Runtime.NODEJS_12_X,
       handler: "index.handler",
-      code: lambda.Code.fromAsset(
-        path.join(__dirname, "..", "..", "app", "uploader")
-      ),
+      code: lambda.Code.fromAsset(path.join(__dirname, "..", "..", "app", "uploader")),
     });
 
     bucket.grantReadWrite(jsonUploaderFunc);
 
-    bucket.addEventNotification(
-      s3.EventType.OBJECT_CREATED_PUT,
-      new s3n.LambdaDestination(jsonUploaderFunc)
-    );
+    bucket.addEventNotification(s3.EventType.OBJECT_CREATED_PUT, new s3n.LambdaDestination(jsonUploaderFunc));
 
     functions.forEach((f) => {
       const func = new lambda.Function(this, f.name, {
@@ -175,14 +135,7 @@ export class AwsLambdaVersionsStack extends cdk.Stack {
         handler: handlers[f.directory],
         code: lambda.Code.fromAsset(
           path.join(
-            ...[
-              __dirname,
-              "..",
-              "..",
-              "app",
-              f.directory,
-              f.subDirectory,
-            ].filter((p): p is string => Boolean(p))
+            ...[__dirname, "..", "..", "app", f.directory, f.subDirectory].filter((p): p is string => Boolean(p))
           )
         ),
         timeout: cdk.Duration.minutes(1),

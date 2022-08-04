@@ -7,18 +7,14 @@
     <title>aws-lambda-versions</title>
     <script>
       const runtimes = [
-        "AWS_Lambda_nodejs10.x",
-        "AWS_Lambda_nodejs12.x",
+        "AWS_Lambda_nodejs16.x",
         "AWS_Lambda_nodejs14.x",
+        "AWS_Lambda_nodejs12.x",
         "AWS_Lambda_python3.9",
         "AWS_Lambda_python3.8",
         "AWS_Lambda_python3.7",
-        "AWS_Lambda_python3.6",
-        "AWS_Lambda_python2.7",
         "AWS_Lambda_ruby2.7",
-        "AWS_Lambda_ruby2.5",
         "AWS_Lambda_dotnetcore3.1",
-        // "AWS_Lambda_dotnetcore2.1",
         "AWS_Lambda_java11",
         "AWS_Lambda_java8",
       ];
@@ -31,15 +27,9 @@
 
       async function fetchVersions() {
         const versions = Object.fromEntries(
-          await Promise.all(
-            runtimes.map(async (key) => [key, await fetchVersion(key)])
-          )
+          await Promise.all(runtimes.map(async (key) => [key, await fetchVersion(key)]))
         );
-        document.getElementById("result").textContent = JSON.stringify(
-          versions,
-          null,
-          2
-        );
+        document.getElementById("result").textContent = JSON.stringify(versions, null, 2);
       }
 
       fetchVersions().then(console.log).catch(console.error);
